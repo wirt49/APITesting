@@ -14,7 +14,6 @@ namespace APIDemo.Helpers
         public static ExtentReports extentReports;
         public static ExtentHtmlReporter htmlReporter;
         public static ExtentTest testCase;
-        public static ExtentReports extent;
 
         public static void SetupExtentReport(string repornName, string documentTitle, dynamic path)
         {
@@ -23,11 +22,11 @@ namespace APIDemo.Helpers
             htmlReporter.Config.DocumentTitle = documentTitle;
             htmlReporter.Config.ReportName = repornName;
 
-            extent = new ExtentReports();
-            extent.AttachReporter(htmlReporter);
-            //extentReports = extent;
+            extentReports = new ExtentReports();
+            extentReports.AttachReporter(htmlReporter);
         }
 
+        
 
         public static void CreateTest(string testName)
         {
@@ -46,7 +45,7 @@ namespace APIDemo.Helpers
 
         public static void TestStatus(string status)
         {
-            if(status.Equals("Pass"))
+            if (status.Equals("Pass"))
             {
                 testCase.Pass("Test is passed");
             }

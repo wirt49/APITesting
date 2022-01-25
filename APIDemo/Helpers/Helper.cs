@@ -63,5 +63,11 @@ namespace APIDemo
             DTO obj = JsonConvert.DeserializeObject<DTO>(content);
             return obj;
         }
+
+        public string Serialize(dynamic content)
+        {
+            string serializeObject = JsonConvert.SerializeObject(content, Formatting.Indented);
+            return serializeObject;
+        }
     }
 }

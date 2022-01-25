@@ -431,7 +431,10 @@
   <ItemGroup>
     <Compile Include="Demo.cs" />
     <Compile Include="DTO\CreateUserDTO.cs" />
+    <Compile Include="DTO\CreateUserRequestDTO.cs" />
     <Compile Include="DTO\ListOfUsersDTO.cs" />
+    <Compile Include="DTO\UpdateUserDTO.cs" />
+    <Compile Include="Helpers\HandleContent.cs" />
     <Compile Include="Helpers\Helper.cs" />
     <Compile Include="Helpers\Reporter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

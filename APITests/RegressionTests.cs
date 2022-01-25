@@ -14,6 +14,8 @@ namespace APITests
     public class RegressionTests
     {
         public TestContext TestContext { get; set; }
+        public HttpStatusCode statusCode;
+
         [ClassInitialize]
         public static void SetUp(TestContext testContext)
         {
@@ -43,6 +45,8 @@ namespace APITests
                 case UnitTestOutcome.Inconclusive:
                     break;
                 case UnitTestOutcome.Passed:
+                    logStatus = Status.Pass;
+                    Reporter.TestStatus(logStatus.ToString());
                     break;
                 case UnitTestOutcome.InProgress:
                     break;
@@ -67,19 +71,42 @@ namespace APITests
         }
 
         [TestMethod]
-        public void VerifyListOfUsersByRestSharp()
+
+        public void VerifyFirstUserName()
         {
             var demo = new Demo<ListOfUsersDTO>();
-            var user = demo.GetUsers("api/users?page=2");
-            Assert.AreEqual(2, user.Page);
-            Reporter.LogReport(Status.Fail, "Page number does not match");
-            Assert.AreEqual("Michael", user.Data[0].first_name);
-            Reporter.LogReport(Status.Fail, "User first name does not match");
+            var user = demo.GetUsers("api/users?page=1");
+            Assert.AreEqual("George", user.Data[0].first_name);
+            Reporter.LogReport(Status.Pass, "First user's names matches");
+        }
+
+        [TestMethod]
+        public void VerifyUsersAmountOnFirstPage()
+        {
+            var demo = new Demo<ListOfUsersDTO>();
+            var user = demo.GetUsers("api/users?page=1");
+            Assert.AreEqual(1, user.Page);
+            Assert.AreEqual(6, user.Data.Count);
+            Reporter.LogReport(Status.Info, "User amount matches");
 
         }
 
         [TestMethod]
-        public void GetByHTTP()
+        public void VerifyResponseNotFoundUser()
+        {
+            var demo = new Demo<ListOfUsersDTO>();
+            var response = demo.GetUsersResponse("api/users/23");
+            statusCode = response.StatusCode;
+            var str = statusCode.ToString();
+            Assert.AreEqual("NotFound", str);
+
+            Reporter.LogReport(Status.Info, str);
+
+        }
+
+
+        [TestMethod]
+        public void GetUserByHTTP()
         {
             string html;
             string url = "https://reqres.in/api/users/2";
@@ -97,11 +124,11 @@ namespace APITests
         }
 
         [TestMethod]
-        public void CreateByHTTP()
+        public void CreateUserByHTTP()
         {
             string html;
 
-            var reqObject = new UsersRequestObject();
+            var reqObject = new CreateUserRequestDTO();
             reqObject.name = "morpheus";
             reqObject.job = "leader";
 
@@ -121,19 +148,70 @@ namespace APITests
                 html = reader.ReadToEnd();
             }
 
-            var apiResponse = JsonConvert.DeserializeObject<UsersResponseObject>(html);
+            var apiResponse = JsonConvert.DeserializeObject<CreateUserDTO>(html);
             Assert.IsTrue(apiResponse.name.Equals("morpheus") && apiResponse.job.Equals("leader"));
         }
 
+
+        [DeploymentItem("Data\\TestCase.csv"),
+            DataSource("Microsoft.VisualStudio.TestTools.DataSource.CSV", "TestCase.csv", "TestCase#csv", DataAccessMethod.Sequential)]
+
         [TestMethod]
-        public void CreateByRestSharp()
+        public void CreateUserByRestSharp()
         {
-            string requestBody = @"{""name"": ""morph"",
-                                    ""job"": ""lid""}";
+            var users = new CreateUserRequestDTO();
+            users.name = TestContext.DataRow["name"].ToString();
+            users.job = TestContext.DataRow["job"].ToString();
+
             var demo = new Demo<CreateUserDTO>();
-            var user = demo.CreateUser("api/users", requestBody);
+            var user = demo.CreateUser("api/users", users);
             
             Assert.AreEqual("morph", user.name);
+            Reporter.LogReport(Status.Info, "User first names match");
+        }
+
+
+        [TestMethod]
+        public void UpdateUserByRestSharp()
+        {
+            string requestBody = @"{""name"": ""morph"",
+                                    ""job"": ""lider""}";
+
+            var demo = new Demo<UpdateUserDTO>();
+            var user = demo.UpdateUser("api/users/2", requestBody);
+
+            Assert.AreEqual("morph", user.name);
+            Assert.AreEqual("lider", user.job);
+            Reporter.LogReport(Status.Pass, "User first names match");
+        }
+
+
+        [TestMethod]
+        public void VerifyPUTResponse()
+        {
+            string requestBody = @"{""name"": ""Steve"",
+                                    ""job"": ""Jobs""}";
+
+            var demo = new Demo<UpdateUserDTO>();
+            var response = demo.GetUpdateUserResponse("api/users/2", requestBody);
+            statusCode = response.StatusCode;
+            var code = statusCode.ToString();
+            Assert.AreEqual("OK", code);
+
+            Reporter.LogReport(Status.Pass, "Status code:" + code);
+        }
+
+
+        [TestMethod]
+        public void VerifyUserIsDeleted()
+        {
+            var demo = new Demo<ListOfUsersDTO>();
+            var response = demo.DeleteUser("api/users/2");
+            statusCode = response.StatusCode;
+            var code = (int)statusCode;
+            Assert.AreEqual(204, code);
+            
+            Reporter.LogReport(Status.Pass, "User is deleted. Status code: " + code);
         }
     }
 }

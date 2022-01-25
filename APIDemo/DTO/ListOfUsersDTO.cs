@@ -6,20 +6,7 @@ using System.Threading.Tasks;
 
 namespace APIDemo
 {
-    public class UsersResponseObject
-    {
-        public string name { get; set; }
-        public string job { get; set; }
-        public string id { get; set; }
-        public DateTime createdAt { get; set; }
-    }
-
-    public class UsersRequestObject
-    {
-        public string name { get; set; }
-        public string job { get; set; }
-    }
-
+    
     public class RootObject
     {
         public Data data { get; set; }
